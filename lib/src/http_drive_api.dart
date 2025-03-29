@@ -7,12 +7,12 @@ class HttpDriveApi implements GoogleDriveApi
 {
   late final drive.DriveApi _driveApi;
   
-  HttpDriveApi({required http.Client client})
+  HttpDriveApi(http.Client client)
   {
     _driveApi = drive.DriveApi(client);
   }
   
-  String _makeQuery({String? name, String? parentId, String? q, bool onlyFolder = false, String? mimeType}) 
+  String _makeQuery({String? name, String? parentId, String? q, bool onlyFolder = false, bool onlyFile = false, String? mimeType}) 
   {
     List<String> conditions = [];
 
@@ -35,8 +35,11 @@ class HttpDriveApi implements GoogleDriveApi
     if (onlyFolder) 
     {
       conditions.add("mimeType='application/vnd.google-apps.folder'");
+    }
+    else if (onlyFile)
+    {
+      conditions.add("mimeType!='application/vnd.google-apps.folder'");
     } 
-    // 특정 mimeType으로 검색하는 조건
     else if (mimeType?.isNotEmpty ?? false)
     {
       conditions.add("mimeType='$mimeType'");
@@ -55,10 +58,11 @@ class HttpDriveApi implements GoogleDriveApi
     String? parentId,
     String? query,
     String? orderBy,
-    int? pageSize,
+    int? pageSize = 1,
     String? driveId,
     String? fields = "files(id, name, mimeType, createdTime, modifiedTime)",
     bool onlyFolder = false,
+    bool onlyFile = false,
     String? mimeType,
     includeItemsFromAllDrives = false,
     String? space = "drive",
@@ -68,7 +72,7 @@ class HttpDriveApi implements GoogleDriveApi
 
     String? nextPageToken;
 
-    var q = _makeQuery(name:name, parentId:parentId, q:query, onlyFolder: onlyFolder, mimeType: mimeType);
+    var q = _makeQuery(name:name, parentId:parentId, q:query, onlyFolder: onlyFolder, onlyFile: onlyFile, mimeType: mimeType);
 
     do 
     {
@@ -127,5 +131,48 @@ class HttpDriveApi implements GoogleDriveApi
   Future<void> delete(String fileId) async
   {
     await _driveApi.files.delete(fileId, supportsAllDrives: true);
+  }
+  
+  @override
+  Future<String?> getParents(String fileId) async
+  {
+    final file = await _driveApi.files.get(
+      fileId,
+      $fields: 'parents',
+      supportsAllDrives: true,
+    ) as drive.File;
+
+    return file.parents?.join(',');
+  }
+  
+  @override
+  Future<void> moveFile(String fromId, String toId) async
+  {
+    final previousParents = await getParents(fromId);
+
+    await _driveApi.files.update(
+      drive.File(), // ✅ 불필요한 `parents` 설정 제거
+      fromId,
+      addParents: toId,
+      removeParents: previousParents,
+      supportsAllDrives: true,
+    );
+  }
+  
+  @override
+  Future<void> rename(String fileId, String newName) async
+  {
+    await _driveApi.files.update(
+      drive.File()..name = newName,
+      fileId,
+      supportsAllDrives: true,
+    );    
+  }
+  
+  @override
+  Future<Stream<List<int>>> getFileStream(String fileId) async
+  {
+    final mediaStream = await _driveApi.files.get(fileId, downloadOptions: drive.DownloadOptions.fullMedia, supportsAllDrives: true) as drive.Media;
+    return mediaStream.stream;
   }
 }
