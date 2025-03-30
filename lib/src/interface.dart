@@ -8,7 +8,7 @@ abstract interface class GoogleDriveApi {
     String? orderBy,
     int? pageSize = 1,
     String? driveId,
-    String? fields = "files(id, name, mimeType, createdTime, modifiedTime)",
+    String? fields = "id, name, mimeType, createdTime, modifiedTime, size",
     bool onlyFolder = false,
     bool onlyFile = false,
     String? mimeType,

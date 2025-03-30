@@ -60,7 +60,7 @@ class HttpDriveApi implements GoogleDriveApi
     String? orderBy,
     int? pageSize = 1,
     String? driveId,
-    String? fields = "files(id, name, mimeType, createdTime, modifiedTime)",
+    String? fields = "id, name, mimeType, createdTime, modifiedTime, size",
     bool onlyFolder = false,
     bool onlyFile = false,
     String? mimeType,
@@ -73,6 +73,11 @@ class HttpDriveApi implements GoogleDriveApi
     String? nextPageToken;
 
     var q = _makeQuery(name:name, parentId:parentId, q:query, onlyFolder: onlyFolder, onlyFile: onlyFile, mimeType: mimeType);
+
+    if (fields?.isNotEmpty ?? false)
+    {
+      fields = "files($fields)";
+    }
 
     do 
     {
