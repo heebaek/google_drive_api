@@ -151,20 +151,6 @@ class HttpDriveApi implements GoogleDriveApi
   }
   
   @override
-  Future<void> moveFile(String fromId, String toId) async
-  {
-    final previousParents = await getParents(fromId);
-
-    await _driveApi.files.update(
-      drive.File(), // ✅ 불필요한 `parents` 설정 제거
-      fromId,
-      addParents: toId,
-      removeParents: previousParents,
-      supportsAllDrives: true,
-    );
-  }
-  
-  @override
   Future<void> rename(String fileId, String newName) async
   {
     await _driveApi.files.update(
@@ -179,5 +165,68 @@ class HttpDriveApi implements GoogleDriveApi
   {
     final mediaStream = await _driveApi.files.get(fileId, downloadOptions: drive.DownloadOptions.fullMedia, supportsAllDrives: true) as drive.Media;
     return mediaStream.stream;
+  }
+  
+  @override
+  Future<void> copyFile(String fromId, String toId) async 
+  {
+    final copied = drive.File()..parents = [toId];  
+    await _driveApi.files.copy(copied, fromId, supportsAllDrives: true);
+  }
+
+  @override
+  Future<void> copyFolder(String fromId, String toId, {required String? driveId}) async
+  {
+    final originalFolder = await _driveApi.files.get(fromId, supportsAllDrives: true) as drive.File;
+
+    final createdFolder = await createFolder(toId, originalFolder.name!);
+
+    var children = await listFiles(
+      parentId:fromId,
+      driveId: driveId,
+      pageSize: 1000,
+      fields: "id, mimeType",
+      includeItemsFromAllDrives: driveId == null
+    );
+
+    for (var item in children) 
+    {
+      if (item.mimeType == "application/vnd.google-apps.folder") 
+      {
+        await copyFolder(item.id!, createdFolder.id!, driveId: driveId);
+      } 
+      else 
+      {
+        await copyFile(item.id!, createdFolder.id!);
+      }
+    }
+  }
+
+  @override
+  Future<void> moveFile(String fromId, String toId) async
+  {
+    final previousParents = await getParents(fromId);
+
+    await _driveApi.files.update(
+      drive.File(), // ✅ 불필요한 `parents` 설정 제거
+      fromId,
+      addParents: toId,
+      removeParents: previousParents,
+      supportsAllDrives: true,
+    );
+  }
+  
+  @override
+  Future<void> moveFolder(String fromId, String toId) async 
+  {
+    final previousParents = await getParents(fromId);
+
+    await _driveApi.files.update(
+      drive.File(), // ✅ 불필요한 `parents` 설정 제거
+      fromId,
+      addParents: toId,
+      removeParents: previousParents,
+      supportsAllDrives: true,
+    );
   }
 }

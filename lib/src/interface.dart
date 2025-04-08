@@ -36,6 +36,12 @@ abstract interface class GoogleDriveApi {
 
   Future<void> moveFile(String fromId, String toId);
 
+  Future<void> moveFolder(String fromId, String toId);
+
+  Future<void> copyFile(String fromId, String toId);
+
+  Future<void> copyFolder(String fromId, String toId, {required String? driveId});
+
   Future<void> rename(String fileId, String newName);
 
   Future<Stream<List<int>>> getFileStream(String fileId);
