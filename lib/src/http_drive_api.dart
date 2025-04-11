@@ -64,7 +64,6 @@ class HttpDriveApi implements GoogleDriveApi
     bool onlyFolder = false,
     bool onlyFile = false,
     String? mimeType,
-    includeItemsFromAllDrives = false,
     String? space = "drive",
   }) async 
   {
@@ -88,9 +87,11 @@ class HttpDriveApi implements GoogleDriveApi
         spaces: space,
         $fields: fields,
         supportsAllDrives: true,
-        includeItemsFromAllDrives: includeItemsFromAllDrives,
+        includeItemsFromAllDrives: driveId != null,
         driveId: driveId,
         pageToken: nextPageToken,
+        supportsTeamDrives: driveId != null,
+        corpora: driveId != null ? "drive" : null, 
       );
 
       if (response.files?.isNotEmpty ?? false) 
@@ -185,8 +186,7 @@ class HttpDriveApi implements GoogleDriveApi
       parentId:fromId,
       driveId: driveId,
       pageSize: 1000,
-      fields: "id, mimeType",
-      includeItemsFromAllDrives: driveId == null
+      fields: "id, mimeType"
     );
 
     for (var item in children) 
@@ -228,5 +228,30 @@ class HttpDriveApi implements GoogleDriveApi
       removeParents: previousParents,
       supportsAllDrives: true,
     );
+  }
+  
+  @override
+  Future<List<drive.Drive>> listDrives() async 
+  {
+    List<drive.Drive> allDrives = [];
+    String? pageToken;
+    
+    do 
+    {
+      var response = await _driveApi.drives.list(
+        pageToken: pageToken,
+        pageSize: 100, // 한 페이지당 최대 항목 수 (API 기본값보다 큰 값 사용)
+      );
+
+      if (response.drives?.isNotEmpty ?? false)
+      {
+        allDrives.addAll(response.drives!);
+      }
+      
+      pageToken = response.nextPageToken;
+    } 
+    while (pageToken != null);
+    
+    return allDrives;
   }
 }

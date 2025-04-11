@@ -12,9 +12,10 @@ abstract interface class GoogleDriveApi {
     bool onlyFolder = false,
     bool onlyFile = false,
     String? mimeType,
-    includeItemsFromAllDrives = false,
     String? space = "drive",
   });
+
+  Future<List<drive.Drive>> listDrives();
 
   Future<drive.File> createFile(
     String parentId,
