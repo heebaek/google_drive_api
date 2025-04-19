@@ -1,50 +1,77 @@
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
 
+import 'google_drive_drive.dart';
+import 'google_drive_drive_list.dart';
+import 'google_drive_file.dart';
+import 'google_drive_file_list.dart';
 import 'interface.dart';
 
-class HttpDriveApi implements GoogleDriveApi 
-{
+class HttpDriveApi implements GoogleDriveApi {
+  static const String fields = 'id,name,mimeType,createdTime,modifiedTime,size,parents,hasThumbnail,driveId';
+
   late final drive.DriveApi _driveApi;
   
-  HttpDriveApi(http.Client client)
-  {
+  HttpDriveApi(http.Client client) {
     _driveApi = drive.DriveApi(client);
   }
-  
-  String _makeQuery({String? name, String? parentId, String? q, bool onlyFolder = false, bool onlyFile = false, String? mimeType}) 
+
+  GoogleDriveFile convertFile(drive.File file)
   {
+    return GoogleDriveFile(
+      createdTime: file.createdTime,
+      driveId: file.driveId,
+      hasThumbnail: file.hasThumbnail,
+      id: file.id,
+      mimeType: file.mimeType,
+      modifiedTime: file.modifiedTime,
+      name: file.name,
+      parents: file.parents,
+      size: file.size,
+    );
+  }
+
+  GoogleDriveDrive convertDrive(drive.Drive drive)
+  {
+    return GoogleDriveDrive(
+      createdTime: drive.createdTime,
+      hidden: drive.hidden,
+      id: drive.id,
+      name: drive.name,
+    );
+  }
+
+  String _makeQuery({
+    String? name,
+    String? parentId,
+    String? q,
+    bool onlyFolder = false,
+    bool onlyFile = false,
+    String? mimeType,
+  }) {
     List<String> conditions = [];
 
-    if (name?.isNotEmpty ?? false)
-    {
+    if (name?.isNotEmpty ?? false) {
       conditions.add("name = '$name'");
     }
 
-    if (parentId?.isNotEmpty ?? false)
-    {
+    if (parentId?.isNotEmpty ?? false) {
       conditions.add("'$parentId' in parents");
     }
 
-    if (q?.isNotEmpty ?? false)
-    {
+    if (q?.isNotEmpty ?? false) {
       conditions.add(q!);
     }
-    
+
     // 폴더만 검색하는 조건
-    if (onlyFolder) 
-    {
+    if (onlyFolder) {
       conditions.add("mimeType='application/vnd.google-apps.folder'");
-    }
-    else if (onlyFile)
-    {
+    } else if (onlyFile) {
       conditions.add("mimeType!='application/vnd.google-apps.folder'");
-    } 
-    else if (mimeType?.isNotEmpty ?? false)
-    {
+    } else if (mimeType?.isNotEmpty ?? false) {
       conditions.add("mimeType='$mimeType'");
-    } 
-   
+    }
+
     // 삭제된 파일 제외
     conditions.add("trashed=false");
 
@@ -53,84 +80,164 @@ class HttpDriveApi implements GoogleDriveApi
   }
 
   @override
-  Future<List<drive.File>> listFiles({
+  Future<GoogleDriveFileList> listFiles({
     String? name,
     String? parentId,
     String? query,
     String? orderBy,
     int? pageSize = 1,
     String? driveId,
-    String? fields = "id, name, mimeType, createdTime, modifiedTime, size",
+    String? fields = "id,name,mimeType,createdTime,modifiedTime,size,parents,hasThumbnail,driveId",
     bool onlyFolder = false,
     bool onlyFile = false,
     String? mimeType,
     String? space = "drive",
-  }) async 
-  {
-    List<drive.File> list = [];
+    String? nextPageToken,
+  }) async {
+    var q = _makeQuery(
+      name: name,
+      parentId: parentId,
+      q: query,
+      onlyFolder: onlyFolder,
+      onlyFile: onlyFile,
+      mimeType: mimeType,
+    );
 
-    String? nextPageToken;
-
-    var q = _makeQuery(name:name, parentId:parentId, q:query, onlyFolder: onlyFolder, onlyFile: onlyFile, mimeType: mimeType);
-
-    if (fields?.isNotEmpty ?? false)
-    {
+    if (fields?.isNotEmpty ?? false) {
       fields = "files($fields)";
     }
 
-    do 
-    {
-      final response = await _driveApi.files.list(
-        q: q,
-        orderBy: orderBy,
-        pageSize: pageSize,
-        spaces: space,
-        $fields: fields,
-        supportsAllDrives: true,
-        includeItemsFromAllDrives: driveId != null,
-        driveId: driveId,
-        pageToken: nextPageToken,
-        supportsTeamDrives: driveId != null,
-        corpora: driveId != null ? "drive" : null, 
-      );
+    final response = await _driveApi.files.list(
+      q: q,
+      orderBy: orderBy,
+      pageSize: pageSize,
+      spaces: space,
+      $fields: fields,
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: driveId != null,
+      driveId: driveId,
+      pageToken: nextPageToken,
+      supportsTeamDrives: driveId != null,
+      corpora: driveId != null ? "drive" : null,
+    );
 
-      if (response.files?.isNotEmpty ?? false) 
-      {
-        list.addAll(response.files!);
-      }
+    var files = response.files?.map((e) => convertFile(e)).toList();
 
-      nextPageToken = response.nextPageToken;
-    } while (nextPageToken != null);
-    return list;
+    return GoogleDriveFileList(
+      files: files,
+      incompleteSearch: response.incompleteSearch,
+      nextPageToken: response.nextPageToken,
+    );
   }
-  
+
   @override
-  Future<drive.File> createFile(String parentId, String fileName, Stream<List<int>> dataStream, {DateTime? originalDate, int? fileSize, String contentType = 'application/octet-stream'}) async
-  {  
-    final file = drive.File()
-      ..name = fileName
-      ..parents = [parentId]
-      ..modifiedTime = originalDate;
+  Future<GoogleDriveDriveList> listDrives({String? nextPageToken}) async {
+    var response = await _driveApi.drives.list(
+      pageToken: nextPageToken,
+      pageSize: 100, // 한 페이지당 최대 항목 수 (API 기본값보다 큰 값 사용)
+    );
+
+    var drives = response.drives?.map((e) => convertDrive(e)).toList();
+        
+    return GoogleDriveDriveList(
+      drives: drives,
+      nextPageToken: response.nextPageToken,
+    );
+  }
+
+  @override
+  Future<GoogleDriveFile> createFile(
+    String parentId,
+    String fileName,
+    Stream<List<int>> dataStream, {
+    String? driveId,
+    DateTime? originalDate,
+    int? fileSize,
+    String contentType = 'application/octet-stream',
+  }) async {
+    final file =
+        drive.File()
+          ..name = fileName
+          ..parents = [parentId]
+          ..driveId = driveId
+          ..modifiedTime = originalDate;
 
     final media = drive.Media(dataStream, fileSize, contentType: contentType);
-    final result = await _driveApi.files.create(file, uploadMedia: media, supportsAllDrives: true);
-    return result;
-  }
-  
-  @override
-  Future<drive.File> createFolder(String parentId, String folderName) async
-  {
-    final folder = drive.File()
-      ..name = folderName
-      ..mimeType = 'application/vnd.google-apps.folder'
-      ..parents = [parentId];
-
     final result = await _driveApi.files.create(
-      folder, 
+      file,
+      uploadMedia: media,
       supportsAllDrives: true,
     );
 
-    return result;
+    return convertFile(result);
+  }
+
+  @override
+  Future<GoogleDriveFile> createFolder(
+    String parentId,
+    String folderName, {
+    String? driveId,
+  }) async {
+    final folder =
+        drive.File()
+          ..driveId = driveId
+          ..name = folderName
+          ..mimeType = 'application/vnd.google-apps.folder'
+          ..parents = [parentId];
+
+    final result = await _driveApi.files.create(
+      folder,
+      supportsAllDrives: true,
+    );
+
+    return convertFile(result);
+  }
+
+  @override
+  Future<GoogleDriveFile> getFile(String fileId) async {
+    final file =
+        await _driveApi.files.get(
+              fileId,
+              $fields: fields,
+              supportsAllDrives: true,
+            )
+            as drive.File;
+
+    return convertFile(file);
+  }
+
+  @override
+  Future<GoogleDriveFile> updateFile(
+    String fileId, {
+    String? fileName,
+    String? addParents,
+    String? removeParents,
+  }) async {
+    var request = drive.File();
+    if (fileName != null) request.name = fileName;
+
+    var file = await _driveApi.files.update(
+      request,
+      fileId,
+      addParents: addParents,
+      removeParents: removeParents,
+      supportsAllDrives: true,
+      $fields:fields
+    );
+
+    return convertFile(file);
+  }
+
+  @override
+  Future<Stream<List<int>>> getFileStream(String fileId) async {
+    final mediaStream =
+        await _driveApi.files.get(
+              fileId,
+              downloadOptions: drive.DownloadOptions.fullMedia,
+              supportsAllDrives: true,
+            )
+            as drive.Media;
+    return mediaStream.stream;
   }
   
   @override
@@ -140,118 +247,28 @@ class HttpDriveApi implements GoogleDriveApi
   }
   
   @override
-  Future<String?> getParents(String fileId) async
-  {
-    final file = await _driveApi.files.get(
-      fileId,
-      $fields: 'parents',
-      supportsAllDrives: true,
-    ) as drive.File;
-
-    return file.parents?.join(',');
-  }
-  
-  @override
-  Future<void> rename(String fileId, String newName) async
-  {
-    await _driveApi.files.update(
-      drive.File()..name = newName,
-      fileId,
-      supportsAllDrives: true,
-    );    
-  }
-  
-  @override
-  Future<Stream<List<int>>> getFileStream(String fileId) async
-  {
-    final mediaStream = await _driveApi.files.get(fileId, downloadOptions: drive.DownloadOptions.fullMedia, supportsAllDrives: true) as drive.Media;
-    return mediaStream.stream;
-  }
-  
-  @override
-  Future<void> copyFile(String fromId, String toId) async 
+  Future<GoogleDriveFile> copyFile(String fromId, String toId) async 
   {
     final copied = drive.File()..parents = [toId];  
-    await _driveApi.files.copy(copied, fromId, supportsAllDrives: true);
+    var file = await _driveApi.files.copy(copied, fromId, supportsAllDrives: true, $fields: fields);
+    return convertFile(file);
   }
+  /*
 
-  @override
-  Future<void> copyFolder(String fromId, String toId, {required String? driveId}) async
-  {
-    final originalFolder = await _driveApi.files.get(fromId, supportsAllDrives: true) as drive.File;
+    var sourceFile = await getFile(fromId);
+    final file = drive.File()
+      ..name = sourceFile.name
+      ..parents = [toId]
+      ..mimeType = 'application/vnd.google-apps.file';
 
-    final createdFolder = await createFolder(toId, originalFolder.name!);
-
-    var children = await listFiles(
-      parentId:fromId,
-      driveId: driveId,
-      pageSize: 1000,
-      fields: "id, mimeType"
-    );
-
-    for (var item in children) 
-    {
-      if (item.mimeType == "application/vnd.google-apps.folder") 
-      {
-        await copyFolder(item.id!, createdFolder.id!, driveId: driveId);
-      } 
-      else 
-      {
-        await copyFile(item.id!, createdFolder.id!);
-      }
-    }
-  }
-
-  @override
-  Future<void> moveFile(String fromId, String toId) async
-  {
-    final previousParents = await getParents(fromId);
-
-    await _driveApi.files.update(
-      drive.File(), // ✅ 불필요한 `parents` 설정 제거
+    var newFile = await _driveApi.files.copy(
+      file,
       fromId,
-      addParents: toId,
-      removeParents: previousParents,
       supportsAllDrives: true,
+      $fields: fields
     );
-  }
-  
-  @override
-  Future<void> moveFolder(String fromId, String toId) async 
-  {
-    final previousParents = await getParents(fromId);
 
-    await _driveApi.files.update(
-      drive.File(), // ✅ 불필요한 `parents` 설정 제거
-      fromId,
-      addParents: toId,
-      removeParents: previousParents,
-      supportsAllDrives: true,
-    );
+    return convertFile(newFile);
   }
-  
-  @override
-  Future<List<drive.Drive>> listDrives() async 
-  {
-    List<drive.Drive> allDrives = [];
-    String? pageToken;
-    
-    do 
-    {
-      var response = await _driveApi.drives.list(
-        pageToken: pageToken,
-        pageSize: 100, // 한 페이지당 최대 항목 수 (API 기본값보다 큰 값 사용)
-      );
-
-      if (response.drives?.isNotEmpty ?? false)
-      {
-        allDrives.addAll(response.drives!);
-      }
-      
-      pageToken = response.nextPageToken;
-    } 
-    while (pageToken != null);
-    
-    return allDrives;
-  }
+  */
 }
