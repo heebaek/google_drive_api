@@ -1,4 +1,5 @@
-export 'package:http/http.dart';
+
+export 'package:oauth2restclient/oauth2restclient.dart';
 
 export 'src/google_drive_drive.dart';
 export 'src/google_drive_drive_list.dart';
