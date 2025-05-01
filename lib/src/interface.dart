@@ -11,7 +11,7 @@ abstract interface class GoogleDriveApi {
     String? orderBy,
     int? pageSize = 1,
     String? driveId,
-    String? fields = "id,name,mimeType,createdTime,modifiedTime,size,parents,hasThumbnail,driveId",
+    String? fields,
     bool onlyFolder = false,
     bool onlyFile = false,
     String? mimeType,
@@ -41,19 +41,11 @@ abstract interface class GoogleDriveApi {
 
   Future<GoogleDriveFile> getFile(String fileId);
 
-  Future<GoogleDriveFile> updateFile(String fileId, {String? fileName, String? addParents, String? removeParents});
+  Future<GoogleDriveFile> updateFile(String fileId, {String? fileName, List<String>? addParents, List<String>? removeParents});
 
   Future<Stream<List<int>>> getFileStream(String fileId);
 
   Future<void> delete(String fileId);
-
-  //Future<String?> getParents(String fileId);
-
-  //Future<void> moveFile(String fromId, String toId);
-
-  //Future<void> moveFolder(String fromId, String toId);
-
+  
   Future<GoogleDriveFile> copyFile(String fromId, String toId);
-
-  //Future<void> rename(String fileId, String newName);
 }

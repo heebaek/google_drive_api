@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage>
       );
     }
 
-    account.addProvider(google.name, google);
+    account.addProvider(google);
 
     super.initState();
   }
