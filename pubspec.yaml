@@ -1,7 +1,6 @@
 name: google_drive_api
 description: "A new Flutter package project."
 version: 0.0.1
-publish_to: none
 
 environment:
   sdk: ^3.7.0
@@ -11,8 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  oauth2restclient:
-    path: packages/oauth2restclient
+  oauth2restclient: ^0.0.3
   
 dev_dependencies:
   flutter_test:

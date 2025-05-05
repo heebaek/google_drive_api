@@ -282,10 +282,11 @@ packages:
   oauth2restclient:
     dependency: transitive
     description:
-      path: "../packages/oauth2restclient"
-      relative: true
-    source: path
-    version: "0.0.2"
+      name: oauth2restclient
+      sha256: "209ac969225145974d65cd1b1dbbd65730775887fc2fa4168aaef4d4b9909022"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   path:
     dependency: transitive
     description:

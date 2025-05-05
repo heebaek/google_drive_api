@@ -12,8 +12,8 @@ abstract interface class GoogleDriveApi {
     int? pageSize = 1,
     String? driveId,
     String? fields,
-    bool onlyFolder = false,
-    bool onlyFile = false,
+    bool onlyFolder,
+    bool onlyFile,
     String? mimeType,
     String? space,
     String? nextPageToken
