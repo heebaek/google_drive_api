@@ -15,7 +15,7 @@ abstract interface class GoogleDriveApi {
     bool onlyFolder = false,
     bool onlyFile = false,
     String? mimeType,
-    String? space = "drive",
+    String? space,
     String? nextPageToken
   });
 
@@ -28,7 +28,7 @@ abstract interface class GoogleDriveApi {
     String? driveId,
     DateTime? originalDate,
     int? fileSize,
-    String contentType = 'application/octet-stream',
+    String contentType
   });
 
   Future<GoogleDriveFile> createFolder(
