@@ -1,18 +1,18 @@
-import 'google_drive_drive.dart';
+import 'drive.dart';
 
-class GoogleDriveDriveList {
-  List<GoogleDriveDrive>? drives;
+class DriveListResponse {
+  List<Drive>? drives;
   String? nextPageToken;
 
-  GoogleDriveDriveList({
+  DriveListResponse({
     this.drives,
     this.nextPageToken,
   });
 
-  factory GoogleDriveDriveList.fromJson(Map<String, dynamic> json) {
-    return GoogleDriveDriveList(
+  factory DriveListResponse.fromJson(Map<String, dynamic> json) {
+    return DriveListResponse(
       drives: (json['drives'] as List?)
-          ?.map((value) => GoogleDriveDrive.fromJson(value as Map<String, dynamic>))
+          ?.map((value) => Drive.fromJson(value as Map<String, dynamic>))
           .toList(),
       nextPageToken: json['nextPageToken'] as String?,
     );

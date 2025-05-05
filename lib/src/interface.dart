@@ -1,10 +1,10 @@
 
-import 'google_drive_drive_list.dart';
-import 'google_drive_file.dart';
-import 'google_drive_file_list.dart';
+import 'drive_list_response.dart';
+import 'file.dart';
+import 'file_list_response.dart';
 
 abstract interface class GoogleDriveApi {
-  Future<GoogleDriveFileList> listFiles({
+  Future<FileListResponse> listFiles({
     String? name,
     String? parentId,
     String? query,
@@ -19,9 +19,9 @@ abstract interface class GoogleDriveApi {
     String? nextPageToken
   });
 
-  Future<GoogleDriveDriveList> listDrives({String? nextPageToken});
+  Future<DriveListResponse> listDrives({String? nextPageToken});
 
-  Future<GoogleDriveFile> createFile(
+  Future<File> createFile(
     String parentId,
     String fileName,
     Stream<List<int>> dataStream, {
@@ -31,7 +31,7 @@ abstract interface class GoogleDriveApi {
     String contentType
   });
 
-  Future<GoogleDriveFile> createFolder(
+  Future<File> createFolder(
     String parentId,
     String folderName,
     {
@@ -39,13 +39,13 @@ abstract interface class GoogleDriveApi {
     }
   );
 
-  Future<GoogleDriveFile> getFile(String fileId);
+  Future<File> getFile(String fileId);
 
-  Future<GoogleDriveFile> updateFile(String fileId, {String? fileName, List<String>? addParents, List<String>? removeParents});
+  Future<File> updateFile(String fileId, {String? fileName, List<String>? addParents, List<String>? removeParents});
 
   Future<Stream<List<int>>> getFileStream(String fileId);
 
   Future<void> delete(String fileId);
   
-  Future<GoogleDriveFile> copyFile(String fromId, String toId);
+  Future<File> copyFile(String fromId, String toId);
 }

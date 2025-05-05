@@ -1,5 +1,5 @@
 name: google_drive_api
-description: "A new Flutter package project."
+description: "A Dart package that provides convenient access to the Google Drive REST API, built on top of `oauth2restclient`."
 version: 0.0.1
 
 environment:

@@ -92,12 +92,12 @@ class _MyHomePageState extends State<MyHomePage>
   
   int _counter = 0;
   
-  Future<List<dynamic>> listFiles(GoogleDriveApi api, {int pageSize = 1, String? nextPageToken}) async 
+  Future<List<dynamic>> listFiles(GoogleDriveApi drive, {int pageSize = 1, String? nextPageToken}) async 
   {
     List<dynamic> items = [];
     do
     {
-      var response = await api.listFiles(pageSize: pageSize, nextPageToken: nextPageToken);
+      var response = await drive.listFiles(pageSize: pageSize, nextPageToken: nextPageToken);
 
       items.addAll(response.files ?? []);
       
@@ -121,8 +121,8 @@ class _MyHomePageState extends State<MyHomePage>
     if (token == null) throw Exception("login frist");
     var client = await account.createClient(token);
 
-    GoogleDriveApi api = HttpDriveApi(client);
-    var list = await listFiles(api);
+    GoogleDriveApi drive = GoogleDrive(client);
+    var list = await listFiles(drive);
     for (var item in list)
     {
       debugPrint(jsonEncode(item));

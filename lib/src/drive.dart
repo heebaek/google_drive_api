@@ -1,4 +1,4 @@
-class GoogleDriveDrive {
+class Drive {
   /// The time at which the shared drive was created (RFC 3339 date-time).
   DateTime? createdTime;
 
@@ -9,7 +9,7 @@ class GoogleDriveDrive {
 
   String? name;
 
-  GoogleDriveDrive({
+  Drive({
     this.createdTime,
     this.hidden,
     this.id,
@@ -27,8 +27,8 @@ class GoogleDriveDrive {
   }
 
   // JSON에서 객체를 생성하는 팩토리 메서드
-  factory GoogleDriveDrive.fromJson(Map<String, dynamic> json) {
-    return GoogleDriveDrive(
+  factory Drive.fromJson(Map<String, dynamic> json) {
+    return Drive(
       createdTime: json['createdTime'] != null 
           ? DateTime.parse(json['createdTime']).toLocal() 
           : null,

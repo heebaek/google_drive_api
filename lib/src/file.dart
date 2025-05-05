@@ -1,4 +1,4 @@
-class GoogleDriveFile 
+class File 
 {
   DateTime? createdTime;
   String? driveId;
@@ -10,7 +10,7 @@ class GoogleDriveFile
   List<String>? parents;
   String? size;
 
-  GoogleDriveFile({
+  File({
     this.createdTime,
     this.driveId,
     this.hasThumbnail,
@@ -22,8 +22,8 @@ class GoogleDriveFile
     this.size,
   });
 
-  factory GoogleDriveFile.fromJson(Map<String, dynamic> json) {
-    return GoogleDriveFile(
+  factory File.fromJson(Map<String, dynamic> json) {
+    return File(
       createdTime: json['createdTime'] != null
           ? DateTime.parse(json['createdTime']).toLocal()
           : null,

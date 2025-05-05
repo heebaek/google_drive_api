@@ -1,20 +1,20 @@
-import 'google_drive_file.dart';
+import 'file.dart';
 
-class GoogleDriveFileList {
-  List<GoogleDriveFile>? files;
+class FileListResponse {
+  List<File>? files;
   bool? incompleteSearch;
   String? nextPageToken;
 
-  GoogleDriveFileList({
+  FileListResponse({
     this.files,
     this.incompleteSearch,
     this.nextPageToken,
   });
 
-  factory GoogleDriveFileList.fromJson(Map<String, dynamic> json) {
-    return GoogleDriveFileList(
+  factory FileListResponse.fromJson(Map<String, dynamic> json) {
+    return FileListResponse(
       files: (json['files'] as List?)
-          ?.map((value) => GoogleDriveFile.fromJson(value as Map<String, dynamic>))
+          ?.map((value) => File.fromJson(value as Map<String, dynamic>))
           .toList(),
       incompleteSearch: json['incompleteSearch'] as bool?,
       nextPageToken: json['nextPageToken'] as String?,

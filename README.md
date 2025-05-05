@@ -1,39 +1,108 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# 📂 GoogleDriveRestClient
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+A Dart package that provides convenient access to the Google Drive REST API, built on top of `oauth2restclient`.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+---
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+## ✨ Features
 
-## Features
+- 🔐 OAuth2 authentication via `oauth2restclient`
+- 📄 List, upload, download, copy, move, and delete Google Drive files
+- 🗂 List and create folders in My Drive or Shared Drives
+- 💡 Easy access to Google Drive Streams and metadata
+- 📁 Supports both personal drive and shared/team drives
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+---
 
-## Getting started
+## 📦 Installation
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Add to your `pubspec.yaml`:
 
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  google_drive_restclient: ^0.0.1
+  oauth2restclient: ^0.0.3
 ```
 
-## Additional information
+---
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+## 🚀 Getting Started
+
+```dart
+import 'package:google_drive_restclient/google_drive_restclient.dart';
+import 'package:oauth2restclient/oauth2restclient.dart';
+
+void main() async {
+  final account = OAuth2Account();
+
+  // Add Google as an OAuth2 provider
+  account.addProvider("google", Google(
+    clientId: "YOUR_CLIENT_ID",
+    redirectUri: "YOUR_REDIRECT_URI",
+    scopes: [
+      "https://www.googleapis.com/auth/drive",
+      "openid", "email"
+    ],
+  ));
+
+  // Login or load token
+  final token = await account.newLogin("google");
+  final client = await account.createClient(token);
+
+  // Initialize API
+  final drive = GoogleDriveApiImpl(client);
+
+  // List files in the root
+  final files = await drive.listFiles(parentId: "root");
+
+  for (final file in files.files) {
+    print("${file.name} (${file.id})");
+  }
+}
+```
+
+---
+
+## 📂 Example Operations
+
+- **List Files**:
+```dart
+await drive.listFiles(parentId: 'root', onlyFile: true);
+```
+
+- **Upload File**:
+```dart
+await drive.createFile('root', 'example.txt', stream, fileSize: 123, contentType: 'text/plain');
+```
+
+- **Create Folder**:
+```dart
+await drive.createFolder('root', 'New Folder');
+```
+
+- **Download File**:
+```dart
+final stream = await drive.getFileStream(fileId);
+```
+
+- **Copy File**:
+```dart
+await drive.copyFile(sourceFileId, targetParentId);
+```
+
+- **Delete File**:
+```dart
+await drive.delete(fileId);
+```
+
+---
+
+## 🔗 Dependencies
+
+- [`oauth2restclient`](https://pub.dev/packages/oauth2restclient)
+
+---
+
+## 📄 License
+
+MIT License © Heebaek Choi
