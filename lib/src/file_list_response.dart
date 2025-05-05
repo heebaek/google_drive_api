@@ -1,7 +1,7 @@
-import 'file.dart';
+import 'gd_file.dart';
 
 class FileListResponse {
-  List<File>? files;
+  List<GDFile>? files;
   bool? incompleteSearch;
   String? nextPageToken;
 
@@ -14,7 +14,7 @@ class FileListResponse {
   factory FileListResponse.fromJson(Map<String, dynamic> json) {
     return FileListResponse(
       files: (json['files'] as List?)
-          ?.map((value) => File.fromJson(value as Map<String, dynamic>))
+          ?.map((value) => GDFile.fromJson(value as Map<String, dynamic>))
           .toList(),
       incompleteSearch: json['incompleteSearch'] as bool?,
       nextPageToken: json['nextPageToken'] as String?,

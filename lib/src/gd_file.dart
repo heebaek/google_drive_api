@@ -1,4 +1,4 @@
-class File 
+class GDFile 
 {
   DateTime? createdTime;
   String? driveId;
@@ -10,7 +10,7 @@ class File
   List<String>? parents;
   String? size;
 
-  File({
+  GDFile({
     this.createdTime,
     this.driveId,
     this.hasThumbnail,
@@ -22,8 +22,8 @@ class File
     this.size,
   });
 
-  factory File.fromJson(Map<String, dynamic> json) {
-    return File(
+  factory GDFile.fromJson(Map<String, dynamic> json) {
+    return GDFile(
       createdTime: json['createdTime'] != null
           ? DateTime.parse(json['createdTime']).toLocal()
           : null,

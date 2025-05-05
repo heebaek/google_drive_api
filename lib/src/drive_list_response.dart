@@ -1,7 +1,7 @@
-import 'drive.dart';
+import 'gd_drive.dart';
 
 class DriveListResponse {
-  List<Drive>? drives;
+  List<GDDrive>? drives;
   String? nextPageToken;
 
   DriveListResponse({
@@ -12,7 +12,7 @@ class DriveListResponse {
   factory DriveListResponse.fromJson(Map<String, dynamic> json) {
     return DriveListResponse(
       drives: (json['drives'] as List?)
-          ?.map((value) => Drive.fromJson(value as Map<String, dynamic>))
+          ?.map((value) => GDDrive.fromJson(value as Map<String, dynamic>))
           .toList(),
       nextPageToken: json['nextPageToken'] as String?,
     );

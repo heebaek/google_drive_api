@@ -1,8 +1,8 @@
 import 'package:oauth2restclient/oauth2restclient.dart';
 
 import 'drive_list_response.dart';
-import 'file.dart';
 import 'file_list_response.dart';
+import 'gd_file.dart';
 import 'interface.dart';
 
 class GoogleDrive implements GoogleDriveApi {
@@ -162,7 +162,7 @@ class GoogleDrive implements GoogleDriveApi {
   }
 
   @override
-  Future<File> createFile(
+  Future<GDFile> createFile(
     String parentId,
     String fileName,
     Stream<List<int>> dataStream, {
@@ -180,7 +180,7 @@ class GoogleDrive implements GoogleDriveApi {
     );
 
     final fileMeta =
-        File(
+        GDFile(
           createdTime: originalDate,
           driveId: driveId,
           mimeType: contentType,
@@ -198,17 +198,17 @@ class GoogleDrive implements GoogleDriveApi {
     var body = OAuth2MultiBody.related(meta, file);
 
     var json = await client.postJson(url, body: body, queryParams: queryParams);
-    return File.fromJson(json);
+    return GDFile.fromJson(json);
   }
 
   @override
-  Future<File> createFolder(
+  Future<GDFile> createFolder(
     String parentId,
     String folderName, {
     String? driveId,
   }) async {
     final fileMeta =
-        File(
+        GDFile(
           driveId: driveId,
           mimeType: 'application/vnd.google-apps.folder',
           name: folderName,
@@ -225,22 +225,22 @@ class GoogleDrive implements GoogleDriveApi {
     OAuth2JsonBody body = OAuth2JsonBody(fileMeta);
 
     var json = await client.postJson(url, body: body, queryParams: queryParams);
-    return File.fromJson(json);
+    return GDFile.fromJson(json);
   }
 
   @override
-  Future<File> getFile(String fileId) async {
+  Future<GDFile> getFile(String fileId) async {
     var url = "https://www.googleapis.com/drive/v3/files/$fileId";
     var queryParams = _makeQueryParams(
       fields: theFields,
       supportsAllDrives: true,
     );
     var json = await client.getJson(url, queryParams: queryParams);
-    return File.fromJson(json);
+    return GDFile.fromJson(json);
   }
 
   @override
-  Future<File> updateFile(
+  Future<GDFile> updateFile(
     String fileId, {
     String? fileName,
     List<String>? addParents,
@@ -255,7 +255,7 @@ class GoogleDrive implements GoogleDriveApi {
       removeParents: removeParents,
     );
 
-    var file = File(name: fileName);
+    var file = GDFile(name: fileName);
     var body = OAuth2JsonBody(file.toJson());
 
     var response = await client.patchJson(
@@ -263,7 +263,7 @@ class GoogleDrive implements GoogleDriveApi {
       body: body,
       queryParams: queryParams,
     );
-    return File.fromJson(response);
+    return GDFile.fromJson(response);
   }
 
   @override
@@ -283,17 +283,17 @@ class GoogleDrive implements GoogleDriveApi {
   }
 
   @override
-  Future<File> copyFile(String fromId, String toId) async {
+  Future<GDFile> copyFile(String fromId, String toId) async {
     var url =
         "https://www.googleapis.com/drive/v3/files/$fromId/copy";
     var queryParams = _makeQueryParams(fields: theFields, supportsAllDrives: true);
-    final copied = File(parents: [toId]);
+    final copied = GDFile(parents: [toId]);
     var body = OAuth2JsonBody(copied.toJson());
     var response = await client.postJson(
       url,
       body: body,
       queryParams: queryParams,
     );
-    return File.fromJson(response);
+    return GDFile.fromJson(response);
   }
 }
