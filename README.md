@@ -21,7 +21,6 @@ Add to your `pubspec.yaml`:
 ```yaml
 dependencies:
   google_drive_restclient: ^0.0.1
-  oauth2restclient: ^0.0.3
 ```
 
 ---
@@ -36,7 +35,7 @@ void main() async {
   final account = OAuth2Account();
 
   // Add Google as an OAuth2 provider
-  account.addProvider("google", Google(
+  account.addProvider(Google(
     clientId: "YOUR_CLIENT_ID",
     redirectUri: "YOUR_REDIRECT_URI",
     scopes: [
@@ -50,7 +49,7 @@ void main() async {
   final client = await account.createClient(token);
 
   // Initialize API
-  final drive = GoogleDriveApiImpl(client);
+  final drive = GoogleDrive(client);
 
   // List files in the root
   final files = await drive.listFiles(parentId: "root");
