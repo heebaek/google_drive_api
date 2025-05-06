@@ -5,25 +5,22 @@ class FileListResponse {
   bool? incompleteSearch;
   String? nextPageToken;
 
-  FileListResponse({
-    this.files,
-    this.incompleteSearch,
-    this.nextPageToken,
-  });
+  FileListResponse({this.files, this.incompleteSearch, this.nextPageToken});
 
   factory FileListResponse.fromJson(Map<String, dynamic> json) {
     return FileListResponse(
-      files: (json['files'] as List?)
-          ?.map((value) => GDFile.fromJson(value as Map<String, dynamic>))
-          .toList(),
+      files:
+          (json['files'] as List?)
+              ?.map((value) => GDFile.fromJson(value as Map<String, dynamic>))
+              .toList(),
       incompleteSearch: json['incompleteSearch'] as bool?,
       nextPageToken: json['nextPageToken'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        if (files != null) 'files': files!.map((file) => file.toJson()).toList(),
-        if (incompleteSearch != null) 'incompleteSearch': incompleteSearch!,
-        if (nextPageToken != null) 'nextPageToken': nextPageToken!,
-      };
+    if (files != null) 'files': files!.map((file) => file.toJson()).toList(),
+    if (incompleteSearch != null) 'incompleteSearch': incompleteSearch!,
+    if (nextPageToken != null) 'nextPageToken': nextPageToken!,
+  };
 }

@@ -9,12 +9,7 @@ class GDDrive {
 
   String? name;
 
-  GDDrive({
-    this.createdTime,
-    this.hidden,
-    this.id,
-    this.name,
-  });
+  GDDrive({this.createdTime, this.hidden, this.id, this.name});
 
   // JSON으로 변환하는 메서드
   Map<String, dynamic> toJson() {
@@ -29,9 +24,10 @@ class GDDrive {
   // JSON에서 객체를 생성하는 팩토리 메서드
   factory GDDrive.fromJson(Map<String, dynamic> json) {
     return GDDrive(
-      createdTime: json['createdTime'] != null 
-          ? DateTime.parse(json['createdTime']).toLocal() 
-          : null,
+      createdTime:
+          json['createdTime'] != null
+              ? DateTime.parse(json['createdTime']).toLocal()
+              : null,
       hidden: json['hidden'],
       id: json['id'],
       name: json['name'],

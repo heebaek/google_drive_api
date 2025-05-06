@@ -1,4 +1,3 @@
-
 import 'drive_list_response.dart';
 import 'file_list_response.dart';
 import 'gd_file.dart';
@@ -16,7 +15,7 @@ abstract interface class GoogleDriveApi {
     bool onlyFile,
     String? mimeType,
     String? space,
-    String? nextPageToken
+    String? nextPageToken,
   });
 
   Future<DriveListResponse> listDrives({String? nextPageToken});
@@ -28,24 +27,27 @@ abstract interface class GoogleDriveApi {
     String? driveId,
     DateTime? originalDate,
     int? fileSize,
-    String contentType
+    String contentType,
   });
 
   Future<GDFile> createFolder(
     String parentId,
-    String folderName,
-    {
-      String? driveId
-    }
-  );
+    String folderName, {
+    String? driveId,
+  });
 
   Future<GDFile> getFile(String fileId);
 
-  Future<GDFile> updateFile(String fileId, {String? fileName, List<String>? addParents, List<String>? removeParents});
+  Future<GDFile> updateFile(
+    String fileId, {
+    String? fileName,
+    List<String>? addParents,
+    List<String>? removeParents,
+  });
 
   Future<Stream<List<int>>> getFileStream(String fileId);
 
   Future<void> delete(String fileId);
-  
+
   Future<GDFile> copyFile(String fromId, String toId);
 }
