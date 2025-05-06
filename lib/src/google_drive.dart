@@ -182,11 +182,9 @@ class GoogleDrive implements GoogleDriveApi {
     final fileMeta =
         GDFile(
           createdTime: originalDate,
-          driveId: driveId,
           mimeType: contentType,
           name: fileName,
           parents: [parentId],
-          size: fileSize?.toString(),
         ).toJson();
 
     OAuth2JsonBody meta = OAuth2JsonBody(fileMeta);
@@ -284,9 +282,11 @@ class GoogleDrive implements GoogleDriveApi {
 
   @override
   Future<GDFile> copyFile(String fromId, String toId) async {
-    var url =
-        "https://www.googleapis.com/drive/v3/files/$fromId/copy";
-    var queryParams = _makeQueryParams(fields: theFields, supportsAllDrives: true);
+    var url = "https://www.googleapis.com/drive/v3/files/$fromId/copy";
+    var queryParams = _makeQueryParams(
+      fields: theFields,
+      supportsAllDrives: true,
+    );
     final copied = GDFile(parents: [toId]);
     var body = OAuth2JsonBody(copied.toJson());
     var response = await client.postJson(
